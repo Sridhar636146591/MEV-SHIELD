@@ -1,6 +1,18 @@
-# 🚀 MEV Detector - Real-Time Front-Running Protection
+# 🚀 MEV Shield - Real-Time Blockchain Mempool Attack Detection & Mitigation System
 
-A full-stack dApp that detects and protects against MEV (Miner Extractable Value) attacks, sandwich attacks, and front-running in real-time on Ethereum.
+A production-grade, full-stack Web3 platform that detects and protects against MEV (Maximal Extractable Value) attacks, sandwich attacks, and priority gas front-running in real time on Ethereum.
+
+## 📚 Formal Academic Design & Specification Documentation
+- 📄 **[Comprehensive Project Design Report (25-Page PDF)](./CA3_Project_Design_Report_MEV_Detector.pdf)** | **[Markdown Version](./CA3_Project_Design_Report_MEV_Detector.md)**
+- 📋 **[Software Requirements Specification (SRS PDF - IEEE 830)](./MEV_Detector_SRS_Document.pdf)** | **[SRS Markdown](./SRS_DOCUMENT.md)**
+- 📊 **[High-Resolution Architectural & UML Diagrams](./report_diagrams/)**:
+  - `use_case_diagram.png`: UML Use Case Diagram with Actor Boundaries
+  - `activity_diagram.png`: UML Activity Diagram with Parallel Heuristic Fork/Join
+  - `swimlane_diagram.png`: UML Swimlane Diagram across 4 Tiers
+  - `sequence_diagram.png`: UML Sequence Diagram (Call & Message Sequence)
+  - `class_diagram.png`: UML Class Diagram & Domain Entities
+  - `system_architecture_diagram.png`: 5-Layer System Architecture Topology
+  - `sandwich_math_diagram.png`: Constant Product AMM Invariant Shift Curve
 
 ## 🌟 Features
 
