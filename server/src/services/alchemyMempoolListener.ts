@@ -62,7 +62,7 @@ export class AlchemyMempoolListener extends EventEmitter {
     }
 
     try {
-      if (!config.alchemyKey) {
+      if (!config.alchemyKey || config.alchemyKey.toUpperCase().includes('YOUR_')) {
         throw new Error('Alchemy API key missing - set ALCHEMY_API_KEY to enable real-time mempool listening');
       }
 

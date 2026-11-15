@@ -1,18 +1,23 @@
 @echo off
-echo Starting MEV Detector servers...
+echo ========================================================
+echo           Starting MEV Detector Servers
+echo ========================================================
 
-echo Starting backend server on port 3001...
-cd /d "c:\Users\Darshan\Desktop\web3 - Copy\server"
-start "Backend Server" cmd /k "npm run dev"
+echo [1/2] Starting backend server on port 3001...
+cd /d "%~dp0server"
+start "MEV Backend Server (Port 3001)" cmd /k "npm start"
 
-timeout /t 5
+timeout /t 3 >nul
 
-echo Starting frontend server on port 3002...
-cd /d "c:\Users\Darshan\Desktop\web3 - Copy\mev-detector"
-set PORT=3003
-start "Frontend Server" cmd /k "set PORT=3003 && npm start"
+echo [2/2] Starting frontend React dashboard on port 3000...
+cd /d "%~dp0mev-detector"
+start "MEV Frontend Dashboard (Port 3000)" cmd /k "npm start"
 
-echo Servers started. Check the command windows for any errors.
-echo Frontend will be available at http://localhost:3003
-echo Backend API will be available at http://localhost:3001
+echo.
+echo ========================================================
+echo Servers launched in separate command windows!
+echo - Frontend Dashboard: http://localhost:3000
+echo - Backend API:        http://localhost:3001
+echo - Backend Health:     http://localhost:3001/api/health
+echo ========================================================
 pause

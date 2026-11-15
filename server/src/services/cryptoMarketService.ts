@@ -179,8 +179,8 @@ class CryptoMarketService {
   private cacheExpiry: number; // in milliseconds
 
   constructor() {
-    this.coinMarketCapApiKey = config.coinMarketCapApiKey || '';
-    this.coinGeckoApiKey = config.coinGeckoApiKey || undefined;
+    this.coinMarketCapApiKey = (config.coinMarketCapApiKey && !config.coinMarketCapApiKey.toUpperCase().includes("YOUR_")) ? config.coinMarketCapApiKey : '';
+    this.coinGeckoApiKey = (config.coinGeckoApiKey && !config.coinGeckoApiKey.toUpperCase().includes("YOUR_")) ? config.coinGeckoApiKey : undefined;
     this.cache = new Map();
     this.cacheExpiry = 5 * 60 * 1000; // 5 minutes
   }

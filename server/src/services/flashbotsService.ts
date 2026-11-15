@@ -25,9 +25,10 @@ class FlashbotsService {
     this.relayUrl = this.selectRelayUrl();
     this.protectRpc = config.flashbotsProtectRpc || DEFAULT_PROTECT_RPC;
 
-    if (config.privateKey) {
+    if (config.privateKey && !config.privateKey.toUpperCase().includes('YOUR_')) {
       try {
-        this.wallet = new Wallet(config.privateKey);
+        const pk = config.privateKey.startsWith('0x') ? config.privateKey : ('0x' + config.privateKey);
+        this.wallet = new Wallet(pk);
         console.log(`🤖 Flashbots Service initialized with relay: ${this.relayUrl}`);
         console.log(`🔐 Flashbots signer: ${this.wallet.address}`);
       } catch (error) {
