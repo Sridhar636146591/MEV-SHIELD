@@ -602,94 +602,473 @@ router.get('/status', (req: Request, res: Response) => {
  * GET /api/dataset/export
  * GET /api/dataset/download
  * Export complete MEV detection and market telemetry dataset in JSON or CSV format
+ * Supports: format=json | format=csv | format=crypto_csv | format=defi_csv | format=full_csv
  */
 router.get(['/dataset/export', '/dataset/download'], async (req: Request, res: Response) => {
   try {
     const format = (req.query.format as string)?.toLowerCase() || 'json';
-    const attacks = mempoolMonitor.getRecentAttacks(100);
+    const attacks = mempoolMonitor.getRecentAttacks(500);
     const stats = mempoolMonitor.getAttackStatistics();
-    
+
+    // Gather all market data in parallel
     let marketMetrics: any = null;
     let cryptoListings: any[] = [];
+    let volatilityData: any[] = [];
+    let correlationData: any[] = [];
+    let fearGreedIndex: number = 50;
+    let gasFeeData: any[] = [];
+    let defiMetrics: any[] = [];
+    let stablecoinData: any[] = [];
+    let whaleData: any = null;
+    let onChainEth: any = null;
+    let onChainBtc: any = null;
+    let miningBtc: any = null;
+    let marketCycle: any = null;
+
     try {
-      marketMetrics = await cryptoMarketService.getGlobalMetrics();
-      cryptoListings = await cryptoMarketService.getCryptocurrencyListings(15);
+      const settled = await Promise.allSettled([
+        cryptoMarketService.getGlobalMetrics(),
+        cryptoMarketService.getCryptocurrencyListings(50),
+        cryptoMarketService.getVolatilityData(['BTC', 'ETH', 'BNB', 'SOL', 'ADA', 'AVAX', 'MATIC', 'DOT']),
+        cryptoMarketService.getCorrelationData(['BTC', 'ETH', 'BNB', 'SOL']),
+        cryptoMarketService.getFearGreedIndex(),
+        cryptoMarketService.getGasFeeData(),
+        cryptoMarketService.getDeFiMetrics(),
+        cryptoMarketService.getStablecoinData(),
+        cryptoMarketService.getWhaleActivityData('ETH'),
+        cryptoMarketService.getOnChainData('ETH'),
+        cryptoMarketService.getOnChainData('BTC'),
+        cryptoMarketService.getMiningMetrics('BTC'),
+        cryptoMarketService.getMarketCycleData(),
+      ]).then(results => results.map(r => r.status === 'fulfilled' ? r.value : null));
+      marketMetrics   = settled[0];
+      cryptoListings  = (settled[1] as any[]) || [];
+      volatilityData  = (settled[2] as any[]) || [];
+      correlationData = (settled[3] as any[]) || [];
+      fearGreedIndex  = (settled[4] as number) ?? 50;
+      gasFeeData      = (settled[5] as any[]) || [];
+      defiMetrics     = (settled[6] as any[]) || [];
+      stablecoinData  = (settled[7] as any[]) || [];
+      whaleData       = settled[8];
+      onChainEth      = settled[9];
+      onChainBtc      = settled[10];
+      miningBtc       = settled[11];
+      marketCycle     = settled[12];
     } catch (e) {
-      // fallback
+      // partial data is fine
     }
 
+    const csvEscape = (val: any) => {
+      if (val === null || val === undefined) return '""';
+      const str = String(val).replace(/"/g, '""');
+      return `"${str}"`;
+    };
+
+    // ── CSV: MEV Attacks ──────────────────────────────────────────────────────
     if (format === 'csv') {
       const headers = [
-        'id',
-        'hash',
-        'attackType',
-        'riskScore',
-        'slippageLoss_ETH',
-        'gasPrice_Gwei',
-        'timestamp',
-        'victimAddress',
-        'attackerAddress',
-        'targetProtocol',
-        'network',
-        'source',
-        'blockNumber'
+        'id','hash','attackType','riskScore','slippageLoss_ETH','gasPrice_Gwei',
+        'timestamp','victimAddress','attackerAddress','targetProtocol',
+        'network','source','blockNumber'
       ];
-
-      const csvEscape = (val: any) => {
-        if (val === null || val === undefined) return '""';
-        const str = String(val).replace(/"/g, '""');
-        return `"${str}"`;
-      };
-
       const rows = attacks.map((a: any, idx: number) => {
         const gasGwei = a.gasPrice ? (parseFloat(a.gasPrice) / 1e9).toFixed(2) : '0.00';
         const target = a.transactionDetails?.to || a.protocol || 'Uniswap V2/V3';
         return [
-          idx + 1,
-          csvEscape(a.hash),
-          csvEscape(a.attackType || 'other'),
-          a.riskScore || 0,
-          a.slippageLoss || 0,
-          gasGwei,
+          idx + 1, csvEscape(a.hash), csvEscape(a.attackType || 'other'),
+          a.riskScore || 0, a.slippageLoss || 0, gasGwei,
           csvEscape(a.timestamp || new Date().toISOString()),
           csvEscape(a.victimAddress || a.transactionDetails?.from || ''),
-          csvEscape(a.attackerAddress || ''),
-          csvEscape(target),
-          csvEscape(a.network || config.network),
-          csvEscape(a.source || 'mempool'),
+          csvEscape(a.attackerAddress || ''), csvEscape(target),
+          csvEscape(a.network || config.network), csvEscape(a.source || 'mempool'),
           a.blockNumber || ''
         ].join(',');
       });
-
-      const csvContent = [headers.join(','), ...rows].join('\n');
+      const csv = [headers.join(','), ...rows].join('\n');
       res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-      res.setHeader('Content-Disposition', `attachment; filename="mev_shield_complete_dataset_${Date.now()}.csv"`);
-      return res.send(csvContent);
+      res.setHeader('Content-Disposition', `attachment; filename="mev_attacks_${Date.now()}.csv"`);
+      return res.send(csv);
     }
 
-    // Default: Complete JSON dataset containing ALL data
+    // ── CSV: Crypto Listings (rich analytics) ─────────────────────────────────
+    if (format === 'crypto_csv') {
+      const headers = [
+        'rank','name','symbol','slug','cmcRank','numMarketPairs',
+        'price_USD','marketCap_USD','volume24h_USD',
+        'percentChange1h','percentChange24h','percentChange7d','percentChange30d',
+        'circulatingSupply','totalSupply','maxSupply',
+        'fullyDilutedValuation','dominance_pct',
+        'tags','dateAdded','lastUpdated'
+      ];
+      const totalMcap = marketMetrics?.totalMarketCap || 1;
+      const rows = (cryptoListings || []).map((c: any, idx: number) => {
+        const q = c.quote?.USD || {};
+        const fdv = c.maxSupply ? q.price * c.maxSupply : '';
+        const dominance = ((q.marketCap / totalMcap) * 100).toFixed(4);
+        return [
+          idx + 1, csvEscape(c.name), csvEscape(c.symbol), csvEscape(c.slug),
+          c.cmcRank, c.numMarketPairs,
+          (q.price || 0).toFixed(8), (q.marketCap || 0).toFixed(2),
+          (q.volume24h || 0).toFixed(2),
+          (q.percentChange1h || 0).toFixed(4), (q.percentChange24h || 0).toFixed(4),
+          (q.percentChange7d || 0).toFixed(4), (q.percentChange30d || 0).toFixed(4),
+          c.circulatingSupply || '', c.totalSupply || '', c.maxSupply || '',
+          fdv !== '' ? Number(fdv).toFixed(2) : '',
+          dominance,
+          csvEscape((c.tags || []).join('|')),
+          csvEscape(c.dateAdded), csvEscape(q.lastUpdated)
+        ].join(',');
+      });
+      const csv = [headers.join(','), ...rows].join('\n');
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="crypto_analytics_dataset_${Date.now()}.csv"`);
+      return res.send(csv);
+    }
+
+    // ── CSV: DeFi & Gas & Stablecoin metrics ──────────────────────────────────
+    if (format === 'defi_csv') {
+      const defiHeaders = ['protocol','tvl_USD','rank','yield_pct','timestamp'];
+      const defiRows = (defiMetrics || []).map((d: any) => [
+        csvEscape(d.protocol), (d.tvl || 0).toFixed(2), d.rank,
+        (d.yield || 0).toFixed(4), csvEscape(d.timestamp)
+      ].join(','));
+
+      const stableHeaders = ['name','symbol','marketCap_USD','pegStatus','issuanceRate','redemptionRate','timestamp'];
+      const stableRows = (stablecoinData || []).map((s: any) => [
+        csvEscape(s.name), csvEscape(s.symbol), (s.marketCap || 0).toFixed(2),
+        (s.pegStatus || 1).toFixed(6), s.issuanceRate || 0, s.redemptionRate || 0,
+        csvEscape(s.timestamp)
+      ].join(','));
+
+      const gasHeaders = ['network','baseFee_Gwei','priorityFee_Gwei','avgTxCost_USD','timestamp'];
+      const gasRows = (gasFeeData || []).map((g: any) => [
+        csvEscape(g.network), g.baseFee || 0, g.priorityFee || 0,
+        (g.avgTxCost || 0).toFixed(4), csvEscape(g.timestamp)
+      ].join(','));
+
+      const csv = [
+        '# DeFi Protocol TVL',
+        defiHeaders.join(','),
+        ...defiRows,
+        '',
+        '# Stablecoin Metrics',
+        stableHeaders.join(','),
+        ...stableRows,
+        '',
+        '# Gas Fee Data by Network',
+        gasHeaders.join(','),
+        ...gasRows,
+      ].join('\n');
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="defi_gas_stablecoin_dataset_${Date.now()}.csv"`);
+      return res.send(csv);
+    }
+
+    // ── CSV: Full combined (all sections) ─────────────────────────────────────
+    if (format === 'full_csv') {
+      const totalMcap = marketMetrics?.totalMarketCap || 1;
+      const cryptoHeaders = [
+        'section','rank','name','symbol','price_USD','marketCap_USD','volume24h_USD',
+        'pct1h','pct24h','pct7d','pct30d','circulatingSupply','maxSupply',
+        'dominance_pct','fearGreedIndex','btcDominance','ethDominance','tags'
+      ];
+      const cryptoRows = (cryptoListings || []).map((c: any, idx: number) => {
+        const q = c.quote?.USD || {};
+        const dominance = ((q.marketCap / totalMcap) * 100).toFixed(4);
+        return [
+          'crypto', idx + 1, csvEscape(c.name), csvEscape(c.symbol),
+          (q.price || 0).toFixed(8), (q.marketCap || 0).toFixed(2), (q.volume24h || 0).toFixed(2),
+          (q.percentChange1h || 0).toFixed(4), (q.percentChange24h || 0).toFixed(4),
+          (q.percentChange7d || 0).toFixed(4), (q.percentChange30d || 0).toFixed(4),
+          c.circulatingSupply || '', c.maxSupply || '',
+          dominance, fearGreedIndex || 50,
+          (marketMetrics?.bitcoinDominance || 0).toFixed(2),
+          (marketMetrics?.ethereumDominance || 0).toFixed(2),
+          csvEscape((c.tags || []).join('|'))
+        ].join(',');
+      });
+
+      const attackHeaders = [
+        'section','id','hash','attackType','riskScore','slippageLoss_ETH',
+        'gasPrice_Gwei','timestamp','network','blockNumber'
+      ];
+      const attackRows = attacks.map((a: any, idx: number) => {
+        const gasGwei = a.gasPrice ? (parseFloat(a.gasPrice) / 1e9).toFixed(2) : '0.00';
+        return [
+          'mev_attack', idx + 1, csvEscape(a.hash), csvEscape(a.attackType || 'other'),
+          a.riskScore || 0, a.slippageLoss || 0, gasGwei,
+          csvEscape(a.timestamp || new Date().toISOString()),
+          csvEscape(a.network || config.network), a.blockNumber || ''
+        ].join(',');
+      });
+
+      const volatilityRows = (volatilityData || []).map((v: any) => [
+        'volatility', '', '', csvEscape(v.symbol), '', '', '',
+        csvEscape(v.period), v.volatility?.toFixed(4) || '', csvEscape(v.timestamp)
+      ].join(','));
+
+      const csv = [
+        '# MEV Shield Full Analytics Dataset',
+        `# Exported: ${new Date().toISOString()}`,
+        '',
+        '# SECTION: Cryptocurrency Market Data',
+        cryptoHeaders.join(','),
+        ...cryptoRows,
+        '',
+        '# SECTION: MEV Attack Events',
+        attackHeaders.join(','),
+        ...attackRows,
+        '',
+        '# SECTION: Volatility Metrics',
+        'section,,,symbol,,,,period,volatility,timestamp',
+        ...volatilityRows,
+      ].join('\n');
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="mev_shield_full_analytics_${Date.now()}.csv"`);
+      return res.send(csv);
+    }
+
+    // ── JSON: Complete Dataset (all data, all features) ───────────────────────
+    const totalMcap = marketMetrics?.totalMarketCap || 1;
+    const enrichedListings = (cryptoListings || []).map((c: any, idx: number) => {
+      const q = c.quote?.USD || {};
+      return {
+        rank: idx + 1,
+        cmcRank: c.cmcRank,
+        id: c.id,
+        name: c.name,
+        symbol: c.symbol,
+        slug: c.slug,
+        // Pricing
+        price_USD: q.price || 0,
+        marketCap_USD: q.marketCap || 0,
+        fullyDilutedValuation_USD: c.maxSupply ? (q.price || 0) * c.maxSupply : null,
+        volume24h_USD: q.volume24h || 0,
+        volumeToMarketCapRatio: q.marketCap ? ((q.volume24h || 0) / q.marketCap) : null,
+        // Performance
+        percentChange1h: q.percentChange1h || 0,
+        percentChange24h: q.percentChange24h || 0,
+        percentChange7d: q.percentChange7d || 0,
+        percentChange30d: q.percentChange30d || 0,
+        // Supply
+        circulatingSupply: c.circulatingSupply || null,
+        totalSupply: c.totalSupply || null,
+        maxSupply: c.maxSupply || null,
+        supplyRatio: c.maxSupply ? (c.circulatingSupply / c.maxSupply) : null,
+        numMarketPairs: c.numMarketPairs,
+        // Market share
+        marketDominance_pct: ((q.marketCap || 0) / totalMcap * 100),
+        // Metadata
+        tags: c.tags || [],
+        platform: c.platform,
+        dateAdded: c.dateAdded,
+        lastUpdated: q.lastUpdated,
+      };
+    });
+
     const completeDataset = {
       metadata: {
-        datasetName: 'MEV Shield Complete Dataset',
-        description: 'Comprehensive dataset of detected Ethereum MEV attacks, risk scores, slippage losses, mempool telemetry, and market indicators',
+        datasetName: 'MEV Shield Crypto Analytics & MEV Dataset',
+        description: 'Comprehensive cryptocurrency market dataset with pricing, supply, performance, DeFi, stablecoins, gas fees, on-chain metrics, whale activity, market cycle indicators, and MEV attack telemetry. Suitable for quantitative analysis, ML/AI training, and academic research.',
         exportedAt: new Date().toISOString(),
         network: config.network,
-        version: '1.0.0',
-        totalAttacksCount: attacks.length,
+        version: '2.0.0',
+        schema: {
+          cryptocurrencies: '50 coins – price, market cap, volume, % changes (1h/24h/7d/30d), supply data, dominance, FDV, tags',
+          globalMarket: 'Total market cap, volume, BTC/ETH dominance, DeFi & stablecoin metrics',
+          fearGreedIndex: '0–100 sentiment index (0=extreme fear, 100=extreme greed)',
+          volatility: 'Annualised volatility per coin per period',
+          correlations: 'Pairwise Pearson correlations between major assets',
+          gasFees: 'Base fee, priority fee, avg tx cost across EVM networks',
+          defi: 'Protocol TVL rankings, yield, timestamp',
+          stablecoins: 'Major stablecoin market caps and peg deviation',
+          onChain: 'Active addresses, tx count, exchange flows',
+          whaleActivity: 'Large tx count, whale wallet estimates, total whale volume',
+          miningMetrics: 'Hash rate, difficulty, pool distribution for PoW coins',
+          marketCycle: 'Bull/bear/accumulation/distribution phase classification with confidence',
+          mevAttacks: 'All detected MEV events – sandwich, front-run, back-run; hashes, risk scores, slippage losses',
+          mevSummary: 'Aggregate MEV statistics, attack type distribution, total ETH lost',
+        },
+        counts: {
+          cryptocurrencies: enrichedListings.length,
+          mevAttacks: attacks.length,
+          defiProtocols: (defiMetrics || []).length,
+          stablecoins: (stablecoinData || []).length,
+          volatilityEntries: (volatilityData || []).length,
+          correlationPairs: (correlationData || []).length,
+          gasFeeNetworks: (gasFeeData || []).length,
+        },
         systemStatus: {
-          monitoring: mempoolMonitor.isActive(),
+          mempoolMonitoring: mempoolMonitor.isActive(),
           uptimeSeconds: Math.round(process.uptime()),
-        }
+        },
       },
-      summaryStatistics: stats,
-      globalMarketMetrics: marketMetrics,
-      topCryptocurrencies: cryptoListings,
-      attacks: attacks
+
+      // ── Global Market Overview ───────────────────────────────────────────────
+      globalMarketMetrics: marketMetrics ? {
+        ...marketMetrics,
+        fearGreedIndex: fearGreedIndex,
+        fearGreedLabel: fearGreedIndex >= 75 ? 'Extreme Greed'
+          : fearGreedIndex >= 55 ? 'Greed'
+          : fearGreedIndex >= 45 ? 'Neutral'
+          : fearGreedIndex >= 25 ? 'Fear'
+          : 'Extreme Fear',
+        marketCycle: marketCycle,
+      } : null,
+
+      // ── Cryptocurrency Listings (feature-rich) ───────────────────────────────
+      cryptocurrencies: enrichedListings,
+
+      // ── Volatility & Correlation ─────────────────────────────────────────────
+      volatilityMetrics: volatilityData || [],
+      correlationMatrix: correlationData || [],
+
+      // ── On-Chain & Blockchain Analytics ─────────────────────────────────────
+      onChainMetrics: {
+        ETH: onChainEth,
+        BTC: onChainBtc,
+      },
+
+      // ── Whale Activity ───────────────────────────────────────────────────────
+      whaleActivity: whaleData,
+
+      // ── Mining / PoW Metrics ─────────────────────────────────────────────────
+      miningMetrics: {
+        BTC: miningBtc,
+      },
+
+      // ── Gas Fees across Networks ─────────────────────────────────────────────
+      gasFeeData: gasFeeData || [],
+
+      // ── DeFi Ecosystem ───────────────────────────────────────────────────────
+      defiProtocols: defiMetrics || [],
+
+      // ── Stablecoins ──────────────────────────────────────────────────────────
+      stablecoins: stablecoinData || [],
+
+      // ── MEV Attack Events ────────────────────────────────────────────────────
+      mevSummaryStatistics: stats,
+      mevAttacks: attacks,
     };
 
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="mev_shield_complete_dataset_${Date.now()}.json"`);
+    res.setHeader('Content-Disposition', `attachment; filename="mev_shield_analytics_dataset_v2_${Date.now()}.json"`);
     return res.json(completeDataset);
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * GET /api/dataset/crypto-analytics
+ * Purpose-built crypto analytics CSV for data science / ML / research
+ * ?limit=50 - number of coins (default 50, max 100)
+ */
+router.get('/dataset/crypto-analytics', async (req: Request, res: Response) => {
+  try {
+    const limit = Math.min(parseInt((req.query.limit as string) || '50', 10), 100);
+    const format = (req.query.format as string)?.toLowerCase() || 'csv';
+
+    const [listings, globalMetrics, fearGreed, volatility, correlations, defi, stables, gas] = await Promise.allSettled([
+      cryptoMarketService.getCryptocurrencyListings(limit),
+      cryptoMarketService.getGlobalMetrics(),
+      cryptoMarketService.getFearGreedIndex(),
+      cryptoMarketService.getVolatilityData(['BTC','ETH','BNB','SOL','ADA','AVAX','MATIC','DOT','LINK','UNI']),
+      cryptoMarketService.getCorrelationData(['BTC','ETH','BNB','SOL','ADA']),
+      cryptoMarketService.getDeFiMetrics(),
+      cryptoMarketService.getStablecoinData(),
+      cryptoMarketService.getGasFeeData(),
+    ]).then(r => r.map(x => x.status === 'fulfilled' ? x.value : null));
+
+    const coins: any[] = (listings as any) || [];
+    const metrics: any = globalMetrics as any;
+    const fgi: number = (fearGreed as any) || 50;
+    const vol: any[] = (volatility as any) || [];
+    const totalMcap = metrics?.totalMarketCap || 1;
+
+    // Build volatility lookup by symbol
+    const volLookup: Record<string, number> = {};
+    vol.forEach((v: any) => { if (v) volLookup[v.symbol] = v.volatility; });
+
+    if (format === 'json') {
+      const enriched = coins.map((c: any, idx: number) => {
+        const q = c.quote?.USD || {};
+        return {
+          rank: idx + 1, name: c.name, symbol: c.symbol, slug: c.slug,
+          price_USD: q.price, marketCap_USD: q.marketCap,
+          volume24h_USD: q.volume24h, fullyDilutedValuation_USD: c.maxSupply ? q.price * c.maxSupply : null,
+          pct1h: q.percentChange1h, pct24h: q.percentChange24h,
+          pct7d: q.percentChange7d, pct30d: q.percentChange30d,
+          circulatingSupply: c.circulatingSupply, totalSupply: c.totalSupply, maxSupply: c.maxSupply,
+          supplyRatio: c.maxSupply ? c.circulatingSupply / c.maxSupply : null,
+          marketDominance_pct: (q.marketCap / totalMcap) * 100,
+          volumeToMarketCapRatio: q.marketCap ? q.volume24h / q.marketCap : null,
+          volatility_annualised: volLookup[c.symbol] || null,
+          fearGreedIndex: fgi,
+          btcDominance_pct: metrics?.bitcoinDominance,
+          ethDominance_pct: metrics?.ethereumDominance,
+          totalMarketCap_USD: metrics?.totalMarketCap,
+          defiMarketCap_USD: metrics?.defiMarketCap,
+          stablecoinMarketCap_USD: metrics?.stablecoinMarketCap,
+          numMarketPairs: c.numMarketPairs,
+          tags: c.tags, dateAdded: c.dateAdded, lastUpdated: q.lastUpdated,
+        };
+      });
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="crypto_analytics_${Date.now()}.json"`);
+      return res.json({ metadata: { exportedAt: new Date().toISOString(), count: enriched.length, fearGreedIndex: fgi, globalMarketCap_USD: metrics?.totalMarketCap }, cryptocurrencies: enriched, volatilityMetrics: vol, correlationPairs: correlations, defiProtocols: defi, stablecoins: stables, gasFees: gas });
+    }
+
+    // Default: flat CSV with all analytics features per coin
+    const csvEscape = (val: any) => {
+      if (val === null || val === undefined) return '""';
+      const str = String(val).replace(/"/g, '""');
+      return `"${str}"`;
+    };
+
+    const headers = [
+      'rank','name','symbol','slug',
+      'price_USD','marketCap_USD','volume24h_USD','fullyDilutedValuation_USD',
+      'pct_change_1h','pct_change_24h','pct_change_7d','pct_change_30d',
+      'circulatingSupply','totalSupply','maxSupply','supplyRatio',
+      'marketDominance_pct','volumeToMarketCapRatio',
+      'volatility_annualised',
+      'fearGreedIndex','fearGreedLabel',
+      'btcDominance_pct','ethDominance_pct',
+      'totalMarketCap_USD','defiMarketCap_USD','stablecoinMarketCap_USD',
+      'numMarketPairs','tags','dateAdded','lastUpdated'
+    ];
+
+    const fgiLabel = fgi >= 75 ? 'Extreme Greed' : fgi >= 55 ? 'Greed' : fgi >= 45 ? 'Neutral' : fgi >= 25 ? 'Fear' : 'Extreme Fear';
+
+    const rows = coins.map((c: any, idx: number) => {
+      const q = c.quote?.USD || {};
+      const supplyRatio = c.maxSupply ? (c.circulatingSupply / c.maxSupply).toFixed(6) : '';
+      const fdv = c.maxSupply ? (q.price * c.maxSupply).toFixed(2) : '';
+      const dominance = ((q.marketCap / totalMcap) * 100).toFixed(6);
+      const vtmr = q.marketCap ? (q.volume24h / q.marketCap).toFixed(6) : '';
+      const vol24 = volLookup[c.symbol] ? volLookup[c.symbol].toFixed(6) : '';
+
+      return [
+        idx + 1, csvEscape(c.name), csvEscape(c.symbol), csvEscape(c.slug),
+        (q.price || 0).toFixed(8), (q.marketCap || 0).toFixed(2), (q.volume24h || 0).toFixed(2), fdv,
+        (q.percentChange1h || 0).toFixed(6), (q.percentChange24h || 0).toFixed(6),
+        (q.percentChange7d || 0).toFixed(6), (q.percentChange30d || 0).toFixed(6),
+        c.circulatingSupply || '', c.totalSupply || '', c.maxSupply || '', supplyRatio,
+        dominance, vtmr, vol24,
+        fgi, csvEscape(fgiLabel),
+        (metrics?.bitcoinDominance || 0).toFixed(4), (metrics?.ethereumDominance || 0).toFixed(4),
+        (metrics?.totalMarketCap || 0).toFixed(2), (metrics?.defiMarketCap || 0).toFixed(2), (metrics?.stablecoinMarketCap || 0).toFixed(2),
+        c.numMarketPairs || '',
+        csvEscape((c.tags || []).join('|')),
+        csvEscape(c.dateAdded), csvEscape(q.lastUpdated)
+      ].join(',');
+    });
+
+    const csv = [headers.join(','), ...rows].join('\n');
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="crypto_analytics_dataset_${Date.now()}.csv"`);
+    return res.send(csv);
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }
