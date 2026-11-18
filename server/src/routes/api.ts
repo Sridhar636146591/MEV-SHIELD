@@ -32,6 +32,7 @@ import {
 } from '../types';
 import pushNotificationService from '../services/pushNotificationService';
 import cryptoMarketService from '../services/cryptoMarketService';
+import MasterDatasetService from '../services/masterDatasetService';
 import config from '../config';
 
 const router = Router();
@@ -597,6 +598,50 @@ router.get('/status', (req: Request, res: Response) => {
   });
 });
 
+/**
+ * GET /api/dataset/master
+ * GET /api/dataset/master-analytics
+ * Primary Master Analytics Dataset: 1,500+ Rows, 41 Analytical Features
+ * Designed specifically for Data Analysis, Tableau, Power BI, Excel, and Machine Learning models.
+ * Query params:
+ *   ?format=csv (default) | json
+ *   ?days=30 (default 30, max 90)
+ *   ?snapshot=true (if true, returns only the latest single-day 50-row cross section)
+ */
+router.get(['/dataset/master', '/dataset/master-analytics'], async (req: Request, res: Response) => {
+  try {
+    const format = (req.query.format as string)?.toLowerCase() || 'csv';
+    const isSnapshot = (req.query.snapshot as string)?.toLowerCase() === 'true';
+    const days = isSnapshot ? 1 : Math.min(Math.max(parseInt((req.query.days as string) || '30', 10), 1), 90);
+
+    const rows = MasterDatasetService.generateMasterDataset(days);
+
+    if (format === 'json') {
+      const metadata = {
+        datasetName: 'MEV Shield — Master Cryptocurrency Analytics Dataset',
+        description: 'Comprehensive 1,500+ observation quantitative crypto dataset with 41 numeric, categorical, and time-series features. Designed for BI dashboards (Power BI, Tableau), statistical modeling, and ML pipelines.',
+        exportedAt: new Date().toISOString(),
+        timeHorizonDays: days,
+        totalRows: rows.length,
+        totalFeatures: Object.keys(rows[0] || {}).length,
+        featuresList: Object.keys(rows[0] || {}),
+        compatibleTools: ['Power BI', 'Tableau', 'Microsoft Excel', 'Python (Pandas / Scikit-Learn)', 'R (tidyverse)', 'Streamlit', 'Jupyter'],
+      };
+
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="crypto_master_analytics_dataset_${Date.now()}.json"`);
+      return res.json({ metadata, data: rows });
+    }
+
+    // Default: CSV format optimized for Excel, Power BI, and Tableau
+    const csvContent = MasterDatasetService.toCsv(rows);
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="crypto_master_analytics_dataset_${Date.now()}.csv"`);
+    return res.send(csvContent);
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
 /**
  * GET /api/dataset/export
