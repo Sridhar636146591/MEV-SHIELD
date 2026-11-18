@@ -14,7 +14,6 @@
   },
   "dependencies": {
     "@apollo/server": "^4.9.3",
-    "@as-integrations/express": "^2.0.2",
     "@prisma/client": "^6.18.0",
     "@solana/web3.js": "^1.98.4",
     "alchemy-sdk": "^3.2.0",
