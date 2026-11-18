@@ -32,6 +32,7 @@ import {
 } from '../types';
 import pushNotificationService from '../services/pushNotificationService';
 import cryptoMarketService from '../services/cryptoMarketService';
+import config from '../config';
 
 const router = Router();
 
@@ -594,6 +595,104 @@ router.get('/status', (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
     },
   });
+});
+
+
+/**
+ * GET /api/dataset/export
+ * GET /api/dataset/download
+ * Export complete MEV detection and market telemetry dataset in JSON or CSV format
+ */
+router.get(['/dataset/export', '/dataset/download'], async (req: Request, res: Response) => {
+  try {
+    const format = (req.query.format as string)?.toLowerCase() || 'json';
+    const attacks = mempoolMonitor.getRecentAttacks(100);
+    const stats = mempoolMonitor.getAttackStatistics();
+    
+    let marketMetrics: any = null;
+    let cryptoListings: any[] = [];
+    try {
+      marketMetrics = await cryptoMarketService.getGlobalMetrics();
+      cryptoListings = await cryptoMarketService.getCryptocurrencyListings(15);
+    } catch (e) {
+      // fallback
+    }
+
+    if (format === 'csv') {
+      const headers = [
+        'id',
+        'hash',
+        'attackType',
+        'riskScore',
+        'slippageLoss_ETH',
+        'gasPrice_Gwei',
+        'timestamp',
+        'victimAddress',
+        'attackerAddress',
+        'targetProtocol',
+        'network',
+        'source',
+        'blockNumber'
+      ];
+
+      const csvEscape = (val: any) => {
+        if (val === null || val === undefined) return '""';
+        const str = String(val).replace(/"/g, '""');
+        return `"${str}"`;
+      };
+
+      const rows = attacks.map((a: any, idx: number) => {
+        const gasGwei = a.gasPrice ? (parseFloat(a.gasPrice) / 1e9).toFixed(2) : '0.00';
+        const target = a.transactionDetails?.to || a.protocol || 'Uniswap V2/V3';
+        return [
+          idx + 1,
+          csvEscape(a.hash),
+          csvEscape(a.attackType || 'other'),
+          a.riskScore || 0,
+          a.slippageLoss || 0,
+          gasGwei,
+          csvEscape(a.timestamp || new Date().toISOString()),
+          csvEscape(a.victimAddress || a.transactionDetails?.from || ''),
+          csvEscape(a.attackerAddress || ''),
+          csvEscape(target),
+          csvEscape(a.network || config.network),
+          csvEscape(a.source || 'mempool'),
+          a.blockNumber || ''
+        ].join(',');
+      });
+
+      const csvContent = [headers.join(','), ...rows].join('\n');
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="mev_shield_complete_dataset_${Date.now()}.csv"`);
+      return res.send(csvContent);
+    }
+
+    // Default: Complete JSON dataset containing ALL data
+    const completeDataset = {
+      metadata: {
+        datasetName: 'MEV Shield Complete Dataset',
+        description: 'Comprehensive dataset of detected Ethereum MEV attacks, risk scores, slippage losses, mempool telemetry, and market indicators',
+        exportedAt: new Date().toISOString(),
+        network: config.network,
+        version: '1.0.0',
+        totalAttacksCount: attacks.length,
+        systemStatus: {
+          monitoring: mempoolMonitor.isActive(),
+          uptimeSeconds: Math.round(process.uptime()),
+        }
+      },
+      summaryStatistics: stats,
+      globalMarketMetrics: marketMetrics,
+      topCryptocurrencies: cryptoListings,
+      attacks: attacks
+    };
+
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="mev_shield_complete_dataset_${Date.now()}.json"`);
+    return res.json(completeDataset);
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
 export default router;

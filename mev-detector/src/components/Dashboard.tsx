@@ -1,3 +1,4 @@
+import DatasetDownloadModal from './DatasetDownloadModal';
 /**
  * Enhanced Dashboard Component - Complete Redesign
  * Modern, professional interface with real-time data
@@ -341,7 +342,8 @@ const Dashboard: React.FC = () => {
             </h1>
             <p className="text-gray-400 text-lg">Real-time MEV attack detection and prevention powered by AI</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
+            <DatasetDownloadModal variant="primary" />
             <div className="text-right">
               <p className="text-xs text-gray-400 mb-1">Network Status</p>
               <div className="flex items-center gap-2">
@@ -367,6 +369,11 @@ const Dashboard: React.FC = () => {
             <span>Protection: <span className="text-white font-medium">Active</span></span>
           </div>
         </div>
+      </div>
+
+      {/* Dataset Download Card */}
+      <div className="mb-8">
+        <DatasetDownloadModal variant="card" />
       </div>
 
       {/* Stats Grid - 8 Cards */}

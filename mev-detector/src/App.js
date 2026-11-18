@@ -14,6 +14,7 @@ import FlashbotsProtection from './components/FlashbotsProtection';
 import WeeklyReport from './components/WeeklyReport';
 import CryptoMarketTrends from './components/CryptoMarketTrends';
 import MetaMaskButton from './components/MetaMaskButton';
+import DatasetDownloadModal from './components/DatasetDownloadModal';
 
 function App() {
   const [mevData, setMevData] = useState([]);
@@ -77,7 +78,8 @@ function App() {
               </h1>
               <p className="mt-1 text-slate-400 text-sm">Real-time Ethereum MEV Protection & Analysis</p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <DatasetDownloadModal attacks={mevData} variant="navbar" />
               <MetaMaskButton />
             </div>
           </div>
