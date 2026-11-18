@@ -169,76 +169,76 @@ const MempoolMonitor: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 p-8">
+    <div className="min-h-screen bg-gray-900 p-3 sm:p-6 lg:p-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
-          <Activity size={40} className="text-blue-400" />
-          Mempool Monitor
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2 flex items-center gap-2.5 sm:gap-3">
+          <Activity size={32} className="text-blue-400 sm:w-10 sm:h-10 flex-shrink-0" />
+          <span>Mempool Monitor</span>
         </h1>
-        <p className="text-gray-400">Real-time Ethereum mempool transaction monitoring</p>
+        <p className="text-gray-400 text-xs sm:text-sm">Real-time Ethereum mempool transaction monitoring</p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-          <div className="flex items-center justify-between mb-2">
-            <Clock size={24} className="text-yellow-400" />
-            <span className="text-green-400 text-sm flex items-center gap-1">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
+        <div className="bg-gray-800 rounded-xl p-3.5 sm:p-6 border border-gray-700">
+          <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+            <Clock size={20} className="text-yellow-400" />
+            <span className="text-green-400 text-xs sm:text-sm flex items-center gap-1">
               <TrendingUp size={12} />+12%
             </span>
           </div>
-          <h3 className="text-gray-400 text-sm mb-1">Pending Transactions</h3>
-          <p className="text-3xl font-bold text-white">{stats.pending}</p>
-          <p className="text-gray-500 text-xs mt-1">In mempool queue</p>
+          <h3 className="text-gray-400 text-xs sm:text-sm mb-1">Pending TXs</h3>
+          <p className="text-xl sm:text-3xl font-bold text-white">{stats.pending}</p>
+          <p className="text-gray-500 text-[10px] sm:text-xs mt-1">In queue</p>
         </div>
 
-        <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-          <div className="flex items-center justify-between mb-2">
-            <AlertCircle size={24} className="text-red-400" />
-            <span className="text-red-400 text-sm">High Risk</span>
+        <div className="bg-gray-800 rounded-xl p-3.5 sm:p-6 border border-gray-700">
+          <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+            <AlertCircle size={20} className="text-red-400" />
+            <span className="text-red-400 text-[10px] sm:text-xs">High Risk</span>
           </div>
-          <h3 className="text-gray-400 text-sm mb-1">High MEV Potential</h3>
-          <p className="text-3xl font-bold text-red-400">{stats.highMEV}</p>
-          <p className="text-gray-500 text-xs mt-1">Likely MEV opportunities</p>
+          <h3 className="text-gray-400 text-xs sm:text-sm mb-1">High MEV</h3>
+          <p className="text-xl sm:text-3xl font-bold text-red-400">{stats.highMEV}</p>
+          <p className="text-gray-500 text-[10px] sm:text-xs mt-1">Opportunities</p>
         </div>
 
-        <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-          <div className="flex items-center justify-between mb-2">
-            <Zap size={24} className="text-yellow-400" />
-            <span className="text-green-400 text-sm flex items-center gap-1">
+        <div className="bg-gray-800 rounded-xl p-3.5 sm:p-6 border border-gray-700">
+          <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+            <Zap size={20} className="text-yellow-400" />
+            <span className="text-green-400 text-xs sm:text-sm flex items-center gap-1">
               <TrendingUp size={12} />↓ 5%
             </span>
           </div>
-          <h3 className="text-gray-400 text-sm mb-1">Avg Gas Price</h3>
-          <p className="text-3xl font-bold text-white">{stats.avgGasPrice} <span className="text-sm text-gray-400">gwei</span></p>
-          <p className="text-gray-500 text-xs mt-1">Network average</p>
+          <h3 className="text-gray-400 text-xs sm:text-sm mb-1">Avg Gas</h3>
+          <p className="text-xl sm:text-3xl font-bold text-white">{stats.avgGasPrice} <span className="text-xs sm:text-sm text-gray-400">gwei</span></p>
+          <p className="text-gray-500 text-[10px] sm:text-xs mt-1">Network avg</p>
         </div>
 
-        <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-          <div className="flex items-center justify-between mb-2">
-            <TrendingUp size={24} className="text-green-400" />
-            <span className="text-green-400 text-sm">Total Value</span>
+        <div className="bg-gray-800 rounded-xl p-3.5 sm:p-6 border border-gray-700">
+          <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+            <TrendingUp size={20} className="text-green-400" />
+            <span className="text-green-400 text-[10px] sm:text-xs">Volume</span>
           </div>
-          <h3 className="text-gray-400 text-sm mb-1">Transaction Volume</h3>
-          <p className="text-3xl font-bold text-white">{stats.totalValue} <span className="text-sm text-gray-400">ETH</span></p>
-          <p className="text-gray-500 text-xs mt-1">Last 5 minutes</p>
+          <h3 className="text-gray-400 text-xs sm:text-sm mb-1">TX Volume</h3>
+          <p className="text-xl sm:text-3xl font-bold text-white">{stats.totalValue} <span className="text-xs sm:text-sm text-gray-400">ETH</span></p>
+          <p className="text-gray-500 text-[10px] sm:text-xs mt-1">Last 5 min</p>
         </div>
       </div>
 
       {/* Filters and Actions */}
-      <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 mb-6">
-        <div className="flex flex-wrap gap-4 items-center justify-between">
-          <div className="flex gap-4 items-center flex-1">
+      <div className="bg-gray-800 rounded-xl p-3.5 sm:p-6 border border-gray-700 mb-6">
+        <div className="flex flex-col md:flex-row gap-3 sm:gap-4 items-stretch md:items-center justify-between">
+          <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-4 items-stretch sm:items-center flex-1">
             {/* Search */}
-            <div className="relative flex-1 max-w-md">
-              <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <div className="relative flex-1">
+              <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search by hash or address..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                className="w-full pl-9 pr-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-xs sm:text-sm focus:outline-none focus:border-blue-500"
               />
             </div>
 
@@ -246,7 +246,7 @@ const MempoolMonitor: React.FC = () => {
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
-              className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+              className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-xs sm:text-sm focus:outline-none focus:border-blue-500"
             >
               <option value="all">All Types</option>
               <option value="swap">Swap</option>
@@ -259,7 +259,7 @@ const MempoolMonitor: React.FC = () => {
             <select
               value={filterMEV}
               onChange={(e) => setFilterMEV(e.target.value)}
-              className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+              className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-xs sm:text-sm focus:outline-none focus:border-blue-500"
             >
               <option value="all">All MEV Levels</option>
               <option value="high">High</option>
@@ -269,8 +269,8 @@ const MempoolMonitor: React.FC = () => {
             </select>
           </div>
 
-          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white transition-all">
-            <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
+          <button className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white text-xs sm:text-sm transition-all">
+            <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
             Refresh
           </button>
         </div>

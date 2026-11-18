@@ -67,13 +67,14 @@ const AIChat = () => {
   return (
     <>
       {/* Chat Button */}
-      <div className="fixed bottom-6 right-6 z-40">
+      <div className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-40">
         {!isOpen && (
           <button
             onClick={() => setIsOpen(true)}
-            className="relative w-14 h-14 bg-gradient-to-br from-green-500 to-brand-neon rounded-full shadow-lg hover:shadow-brand-neon/50 transition-all hover:scale-110 flex items-center justify-center"
+            aria-label="Open MEV Assistant"
+            className="relative w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-green-500 to-brand-neon rounded-full shadow-lg hover:shadow-brand-neon/50 transition-all hover:scale-110 flex items-center justify-center"
           >
-            <svg className="w-7 h-7 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 sm:w-7 sm:h-7 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
             <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
@@ -83,7 +84,7 @@ const AIChat = () => {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-96 max-w-[calc(100vw-32px)] bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 border border-brand-neon/30 rounded-2xl shadow-2xl flex flex-col max-h-96 animate-slideUp">
+        <div className="fixed bottom-20 right-3 left-3 sm:left-auto sm:right-6 sm:bottom-6 z-50 sm:w-96 max-h-[75vh] sm:max-h-96 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 border border-brand-neon/30 rounded-2xl shadow-2xl flex flex-col animate-slideUp">
           
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-brand-neon/20">

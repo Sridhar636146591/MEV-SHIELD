@@ -36,12 +36,12 @@ interface StatCardProps {
 
 function StatCard({ title, value, change, icon, trend, subtitle }: StatCardProps) {
   return (
-    <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700 hover:border-brand-neon transition-all duration-300 group">
-      <div className="flex items-center justify-between mb-3">
-        <div className="p-3 bg-gray-700/50 rounded-lg group-hover:bg-brand-neon/20 transition-all">
+    <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-3.5 sm:p-6 border border-gray-700 hover:border-brand-neon transition-all duration-300 group">
+      <div className="flex items-center justify-between mb-2.5 sm:mb-3">
+        <div className="p-2 sm:p-3 bg-gray-700/50 rounded-lg group-hover:bg-brand-neon/20 transition-all">
           {icon}
         </div>
-        <span className={`text-sm font-semibold flex items-center gap-1 ${
+        <span className={`text-xs sm:text-sm font-semibold flex items-center gap-1 ${
           trend === 'up' ? 'text-green-400' : trend === 'down' ? 'text-red-400' : 'text-gray-400'
         }`}>
           {change}
@@ -49,9 +49,9 @@ function StatCard({ title, value, change, icon, trend, subtitle }: StatCardProps
           {trend === 'down' && <ArrowDownRight size={14} />}
         </span>
       </div>
-      <h3 className="text-gray-400 text-sm mb-1">{title}</h3>
-      <p className="text-3xl font-bold text-white mb-1">{value}</p>
-      {subtitle && <p className="text-xs text-gray-500">{subtitle}</p>}
+      <h3 className="text-gray-400 text-xs sm:text-sm mb-1">{title}</h3>
+      <p className="text-xl sm:text-3xl font-bold text-white mb-1">{value}</p>
+      {subtitle && <p className="text-[10px] sm:text-xs text-gray-500">{subtitle}</p>}
     </div>
   );
 }
@@ -109,34 +109,34 @@ function RecentAttacks() {
   };
 
   return (
-    <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+    <div className="bg-gray-800 rounded-xl p-4 sm:p-6 border border-gray-700">
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <h3 className="text-base sm:text-lg font-semibold text-white flex items-center gap-2">
           <Shield size={20} className="text-green-400" />
           Recent MEV Attacks
         </h3>
-        <button className="text-brand-neon text-sm font-medium hover:underline">
+        <button className="text-brand-neon text-xs sm:text-sm font-medium hover:underline">
           View All
         </button>
       </div>
       <div className="space-y-3">
         {attacks.map((attack) => (
-          <div key={attack.id} className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-all border border-gray-600/50">
+          <div key={attack.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-all border border-gray-600/50 gap-2 sm:gap-4">
             <div className="flex items-center gap-3">
-              <div className={`px-3 py-1.5 rounded-lg text-xs font-bold border ${getSeverityColor(attack.severity)}`}>
+              <div className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-bold border ${getSeverityColor(attack.severity)}`}>
                 {attack.severity.toUpperCase()}
               </div>
               <div>
-                <p className="text-white font-medium">{attack.type}</p>
+                <p className="text-white font-medium text-sm sm:text-base">{attack.type}</p>
                 <p className="text-gray-400 text-xs flex items-center gap-2">
                   <Globe size={10} />
                   {attack.protocol} • {attack.timestamp}
                 </p>
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-white font-semibold text-lg">{attack.amount}</p>
-              <div className="mt-1">{getStatusBadge(attack.status)}</div>
+            <div className="flex items-center sm:flex-col justify-between sm:items-end border-t sm:border-t-0 pt-2 sm:pt-0 border-gray-700/40">
+              <p className="text-white font-semibold text-base sm:text-lg">{attack.amount}</p>
+              <div className="sm:mt-1">{getStatusBadge(attack.status)}</div>
             </div>
           </div>
         ))}
@@ -147,9 +147,9 @@ function RecentAttacks() {
 
 function NetworkStats() {
   return (
-    <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+    <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-4 sm:p-6 border border-gray-700">
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <h3 className="text-base sm:text-lg font-semibold text-white flex items-center gap-2">
           <Activity size={20} className="text-blue-400" />
           Network Status
         </h3>
@@ -159,40 +159,40 @@ function NetworkStats() {
         </span>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-5 bg-gray-700/30 rounded-xl border border-gray-600/50 hover:border-brand-neon/50 transition-all">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4">
+        <div className="p-4 sm:p-5 bg-gray-700/30 rounded-xl border border-gray-600/50 hover:border-brand-neon/50 transition-all">
           <div className="flex items-center gap-2 mb-2">
             <Zap size={16} className="text-yellow-400" />
-            <p className="text-gray-400 text-sm">Gas Price</p>
+            <p className="text-gray-400 text-xs sm:text-sm">Gas Price</p>
           </div>
-          <p className="text-3xl font-bold text-white">28</p>
-          <p className="text-sm text-gray-400 mt-1">gwei</p>
+          <p className="text-2xl sm:text-3xl font-bold text-white">28</p>
+          <p className="text-xs sm:text-sm text-gray-400 mt-1">gwei</p>
           <div className="flex items-center gap-1 mt-2">
             <ArrowDownRight size={14} className="text-green-400" />
             <span className="text-green-400 text-xs font-medium">5% from last hour</span>
           </div>
         </div>
         
-        <div className="p-5 bg-gray-700/30 rounded-xl border border-gray-600/50 hover:border-brand-neon/50 transition-all">
+        <div className="p-4 sm:p-5 bg-gray-700/30 rounded-xl border border-gray-600/50 hover:border-brand-neon/50 transition-all">
           <div className="flex items-center gap-2 mb-2">
             <Server size={16} className="text-purple-400" />
-            <p className="text-gray-400 text-sm">Pending TXs</p>
+            <p className="text-gray-400 text-xs sm:text-sm">Pending TXs</p>
           </div>
-          <p className="text-3xl font-bold text-white">142,532</p>
-          <p className="text-sm text-gray-400 mt-1">transactions</p>
+          <p className="text-2xl sm:text-3xl font-bold text-white">142,532</p>
+          <p className="text-xs sm:text-sm text-gray-400 mt-1">transactions</p>
           <div className="flex items-center gap-1 mt-2">
             <ArrowUpRight size={14} className="text-yellow-400" />
             <span className="text-yellow-400 text-xs font-medium">12% congestion</span>
           </div>
         </div>
         
-        <div className="p-5 bg-gray-700/30 rounded-xl border border-gray-600/50 hover:border-brand-neon/50 transition-all">
+        <div className="p-4 sm:p-5 bg-gray-700/30 rounded-xl border border-gray-600/50 hover:border-brand-neon/50 transition-all">
           <div className="flex items-center gap-2 mb-2">
             <Eye size={16} className="text-red-400" />
-            <p className="text-gray-400 text-sm">MEV Detected</p>
+            <p className="text-gray-400 text-xs sm:text-sm">MEV Detected</p>
           </div>
-          <p className="text-3xl font-bold text-white">1,847</p>
-          <p className="text-sm text-gray-400 mt-1">opportunities</p>
+          <p className="text-2xl sm:text-3xl font-bold text-white">1,847</p>
+          <p className="text-xs sm:text-sm text-gray-400 mt-1">opportunities</p>
           <div className="flex items-center gap-1 mt-2">
             <AlertTriangle size={14} className="text-red-400" />
             <span className="text-red-400 text-xs font-medium">High activity</span>
@@ -205,9 +205,9 @@ function NetworkStats() {
 
 function ProtectionOverview() {
   return (
-    <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+    <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-4 sm:p-6 border border-gray-700">
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <h3 className="text-base sm:text-lg font-semibold text-white flex items-center gap-2">
           <Lock size={20} className="text-green-400" />
           Your Protection
         </h3>
@@ -216,47 +216,47 @@ function ProtectionOverview() {
         </span>
       </div>
       
-      <div className="mb-6 p-5 bg-green-900/20 border border-green-700 rounded-xl">
+      <div className="mb-4 sm:mb-6 p-4 sm:p-5 bg-green-900/20 border border-green-700 rounded-xl">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-green-400 font-bold text-lg mb-1">✓ Premium Protection Active</p>
-            <p className="text-gray-300 text-sm">Valid until Dec 31, 2024</p>
+            <p className="text-green-400 font-bold text-base sm:text-lg mb-1">✓ Premium Protection Active</p>
+            <p className="text-gray-300 text-xs sm:text-sm">Valid until Dec 31, 2024</p>
           </div>
-          <CheckCircle size={40} className="text-green-400" />
+          <CheckCircle size={36} className="text-green-400 flex-shrink-0" />
         </div>
       </div>
       
-      <div className="grid grid-cols-2 gap-4">
-        <div className="p-4 bg-gray-700/30 rounded-xl border border-gray-600/50">
-          <div className="flex items-center gap-2 mb-2">
-            <Award size={16} className="text-purple-400" />
-            <p className="text-gray-400 text-xs">Protection Level</p>
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
+        <div className="p-3.5 sm:p-4 bg-gray-700/30 rounded-xl border border-gray-600/50">
+          <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+            <Award size={15} className="text-purple-400" />
+            <p className="text-gray-400 text-[11px] sm:text-xs">Protection Level</p>
           </div>
-          <p className="text-2xl font-bold text-white">Premium</p>
+          <p className="text-lg sm:text-2xl font-bold text-white">Premium</p>
         </div>
         
-        <div className="p-4 bg-gray-700/30 rounded-xl border border-gray-600/50">
-          <div className="flex items-center gap-2 mb-2">
-            <MousePointerClick size={16} className="text-blue-400" />
-            <p className="text-gray-400 text-xs">Reports Submitted</p>
+        <div className="p-3.5 sm:p-4 bg-gray-700/30 rounded-xl border border-gray-600/50">
+          <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+            <MousePointerClick size={15} className="text-blue-400" />
+            <p className="text-gray-400 text-[11px] sm:text-xs">Reports</p>
           </div>
-          <p className="text-2xl font-bold text-white">23</p>
+          <p className="text-lg sm:text-2xl font-bold text-white">23</p>
         </div>
         
-        <div className="p-4 bg-gray-700/30 rounded-xl border border-gray-600/50">
-          <div className="flex items-center gap-2 mb-2">
-            <Wallet size={16} className="text-yellow-400" />
-            <p className="text-gray-400 text-xs">Rewards Earned</p>
+        <div className="p-3.5 sm:p-4 bg-gray-700/30 rounded-xl border border-gray-600/50">
+          <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+            <Wallet size={15} className="text-yellow-400" />
+            <p className="text-gray-400 text-[11px] sm:text-xs">Rewards</p>
           </div>
-          <p className="text-2xl font-bold text-white">0.45 ETH</p>
+          <p className="text-lg sm:text-2xl font-bold text-white">0.45 ETH</p>
         </div>
         
-        <div className="p-4 bg-gray-700/30 rounded-xl border border-gray-600/50">
-          <div className="flex items-center gap-2 mb-2">
-            <BarChart3 size={16} className="text-cyan-400" />
-            <p className="text-gray-400 text-xs">Reputation Score</p>
+        <div className="p-3.5 sm:p-4 bg-gray-700/30 rounded-xl border border-gray-600/50">
+          <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+            <BarChart3 size={15} className="text-cyan-400" />
+            <p className="text-gray-400 text-[11px] sm:text-xs">Reputation</p>
           </div>
-          <p className="text-2xl font-bold text-white">92<span className="text-sm text-gray-400">/100</span></p>
+          <p className="text-lg sm:text-2xl font-bold text-white">92<span className="text-xs text-gray-400">/100</span></p>
         </div>
       </div>
     </div>
@@ -332,77 +332,77 @@ const Dashboard: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-3 sm:p-6 lg:p-8">
       {/* Header Section */}
-      <div className="mb-10">
-        <div className="flex items-center justify-between mb-4">
+      <div className="mb-6 sm:mb-10">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
           <div>
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-brand-neon to-green-400 bg-clip-text text-transparent mb-3">
+            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-brand-neon to-green-400 bg-clip-text text-transparent mb-1.5 sm:mb-3">
               ⚡ MEV Detector Dashboard
             </h1>
-            <p className="text-gray-400 text-lg">Real-time MEV attack detection and prevention powered by AI</p>
+            <p className="text-gray-400 text-xs sm:text-base lg:text-lg">Real-time MEV attack detection and prevention powered by AI</p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 self-start sm:self-auto flex-wrap">
             <DatasetDownloadModal variant="primary" />
-            <div className="text-right">
-              <p className="text-xs text-gray-400 mb-1">Network Status</p>
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></span>
-                <span className="text-green-400 font-semibold text-sm">Operational</span>
+            <div className="text-left sm:text-right pl-1 sm:pl-0">
+              <p className="text-[11px] text-gray-400 mb-0.5 sm:mb-1">Network Status</p>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse"></span>
+                <span className="text-green-400 font-semibold text-xs sm:text-sm">Operational</span>
               </div>
             </div>
           </div>
         </div>
         
         {/* Quick Stats Bar */}
-        <div className="flex gap-6 text-sm text-gray-400 bg-gray-800/50 rounded-lg p-4 border border-gray-700">
-          <div className="flex items-center gap-2">
-            <Clock size={14} className="text-brand-neon" />
-            <span>Last updated: <span className="text-white font-medium">Just now</span></span>
+        <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm text-gray-400 bg-gray-800/50 rounded-lg p-3 sm:p-4 border border-gray-700">
+          <div className="flex items-center gap-1.5">
+            <Clock size={14} className="text-brand-neon flex-shrink-0" />
+            <span>Updated: <span className="text-white font-medium">Just now</span></span>
           </div>
-          <div className="flex items-center gap-2">
-            <Globe size={14} className="text-blue-400" />
+          <div className="flex items-center gap-1.5">
+            <Globe size={14} className="text-blue-400 flex-shrink-0" />
             <span>Chain: <span className="text-white font-medium">Ethereum Mainnet</span></span>
           </div>
-          <div className="flex items-center gap-2">
-            <Shield size={14} className="text-green-400" />
+          <div className="flex items-center gap-1.5">
+            <Shield size={14} className="text-green-400 flex-shrink-0" />
             <span>Protection: <span className="text-white font-medium">Active</span></span>
           </div>
         </div>
       </div>
 
       {/* Dataset Download Card */}
-      <div className="mb-8">
+      <div className="mb-6 sm:mb-8">
         <DatasetDownloadModal variant="card" />
       </div>
 
       {/* Stats Grid - 8 Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-10">
         {stats.map((stat, index) => (
           <StatCard key={index} {...stat} />
         ))}
       </div>
 
       {/* Network Status - Full Width */}
-      <div className="mb-8">
+      <div className="mb-6 sm:mb-8">
         <NetworkStats />
       </div>
 
       {/* Two Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-6 sm:mb-8">
         <RecentAttacks />
         <ProtectionOverview />
       </div>
 
       {/* Info Banner */}
-      <div className="mt-8 bg-gradient-to-r from-blue-900/30 to-purple-900/30 rounded-xl p-6 border border-blue-700/50">
-        <div className="flex items-start gap-4">
-          <div className="p-3 bg-blue-900/50 rounded-lg">
-            <AlertTriangle size={24} className="text-blue-400" />
+      <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 rounded-xl p-4 sm:p-6 border border-blue-700/50">
+        <div className="flex items-start gap-3 sm:gap-4">
+          <div className="p-2 sm:p-3 bg-blue-900/50 rounded-lg flex-shrink-0">
+            <AlertTriangle size={20} className="text-blue-400" />
           </div>
           <div>
-            <h4 className="text-lg font-semibold text-white mb-2">Did You Know?</h4>
-            <p className="text-gray-300 text-sm leading-relaxed">
+            <h4 className="text-base sm:text-lg font-semibold text-white mb-1 sm:mb-2">Did You Know?</h4>
+            <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">
               MEV bots can extract value in milliseconds. Our detector monitors the mempool 24/7 and alerts you 
               before malicious actors can exploit your transactions. Stay protected with real-time monitoring 
               and automatic prevention mechanisms.

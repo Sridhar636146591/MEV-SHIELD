@@ -820,44 +820,44 @@ const CryptoMarketTrends = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="bg-gradient-to-r from-slate-900 to-slate-800 border border-slate-700/50 rounded-2xl p-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="bg-gradient-to-r from-slate-900 to-slate-800 border border-slate-700/50 rounded-2xl p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-brand-neon to-green-400 bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-brand-neon to-green-400 bg-clip-text text-transparent">
               📈 Market Analysis
             </h1>
-            <p className="text-slate-400 mt-2">
+            <p className="text-slate-400 text-xs sm:text-sm mt-1">
               Comprehensive cryptocurrency market data and analysis
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="text-sm text-slate-400">Last updated:</div>
-            <div className="text-sm font-medium text-brand-neon">
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            <div className="text-xs sm:text-sm text-slate-400">Updated:</div>
+            <div className="text-xs sm:text-sm font-medium text-brand-neon">
               {new Date().toLocaleTimeString()}
             </div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
-        {/* Vertical Navigation Menu */}
+      <div className="grid grid-cols-1 lg:grid-cols-6 gap-4 sm:gap-6">
+        {/* Navigation Menu: Horizontal chips on mobile/tablet, vertical sidebar on desktop */}
         <div className="lg:col-span-1">
-          <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 h-[calc(100vh-50px)] overflow-y-auto">
-            <h3 className="text-lg font-semibold text-white mb-4">Analysis Categories</h3>
-            <div className="space-y-2">
+          <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-3 sm:p-4 h-auto lg:h-[calc(100vh-50px)] lg:overflow-y-auto">
+            <h3 className="hidden lg:block text-sm font-semibold text-white mb-3">Categories</h3>
+            <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible no-scrollbar pb-1 lg:pb-0 touch-pan-x">
               {sections.map((section) => (
                 <button
                   key={section.id}
                   onClick={() => setActiveSection(section.id)}
-                  className={`flex items-center gap-3 w-full text-left px-3 py-2 rounded-lg text-sm transition ${
+                  className={`flex items-center gap-2 flex-shrink-0 px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm transition whitespace-nowrap ${
                     activeSection === section.id
-                      ? 'bg-brand-neon text-black'
-                      : 'text-slate-300 hover:bg-slate-700'
+                      ? 'bg-brand-neon text-black font-semibold'
+                      : 'text-slate-300 hover:bg-slate-700 bg-slate-800 lg:bg-transparent'
                   }`}
                 >
                   <span>{section.icon}</span>
-                  <span className="truncate">{section.label}</span>
+                  <span>{section.label}</span>
                 </button>
               ))}
             </div>

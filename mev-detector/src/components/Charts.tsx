@@ -163,31 +163,33 @@ const Charts: React.FC = () => {
   const data = chartType === 'bar' ? barData : chartType === 'line' ? lineData : pieData;
   
   return (
-    <div className="w-full h-[80vh] relative bg-gray-900 p-6">
-      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
-        <h2 className="text-2xl font-bold text-white mb-2">MEV Analytics Dashboard</h2>
+    <div className="w-full min-h-[460px] h-[72vh] flex flex-col bg-gray-900 p-3.5 sm:p-6 rounded-xl border border-gray-800">
+      <div className="text-center mb-2 sm:mb-4">
+        <h2 className="text-lg sm:text-2xl font-bold text-white">MEV Analytics Dashboard</h2>
       </div>
-      <ChartsScene chartType={chartType} data={data} />
+      <div className="flex-1 w-full relative min-h-[260px]">
+        <ChartsScene chartType={chartType} data={data} />
+      </div>
       
       {/* Chart Type Selector */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
+      <div className="flex justify-center gap-2 mt-3 sm:mt-4">
         <button 
           onClick={() => setChartType('bar')}
-          className={`px-4 py-2 rounded-lg font-semibold ${chartType === 'bar' ? 'bg-green-500' : 'bg-slate-700'}`}
+          className={`px-3.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg font-semibold transition ${chartType === 'bar' ? 'bg-green-500 text-black font-bold' : 'bg-slate-700 text-white'}`}
         >
-          Bar
+          Bar Chart
         </button>
         <button 
           onClick={() => setChartType('line')}
-          className={`px-4 py-2 rounded-lg font-semibold ${chartType === 'line' ? 'bg-blue-500' : 'bg-slate-700'}`}
+          className={`px-3.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg font-semibold transition ${chartType === 'line' ? 'bg-blue-500 text-white font-bold' : 'bg-slate-700 text-white'}`}
         >
-          Line
+          Line Chart
         </button>
         <button 
           onClick={() => setChartType('pie')}
-          className={`px-4 py-2 rounded-lg font-semibold ${chartType === 'pie' ? 'bg-purple-500' : 'bg-slate-700'}`}
+          className={`px-3.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg font-semibold transition ${chartType === 'pie' ? 'bg-purple-500 text-white font-bold' : 'bg-slate-700 text-white'}`}
         >
-          Pie
+          Pie Chart
         </button>
       </div>
     </div>

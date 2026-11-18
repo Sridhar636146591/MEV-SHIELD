@@ -140,53 +140,53 @@ const AttackDetector: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 p-8">
+    <div className="min-h-screen bg-gray-900 p-3 sm:p-6 lg:p-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
-          <Shield size={40} className="text-green-400" />
-          MEV Attack Detector
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2 flex items-center gap-2.5 sm:gap-3">
+          <Shield size={32} className="text-green-400 sm:w-10 sm:h-10 flex-shrink-0" />
+          <span>MEV Attack Detector</span>
         </h1>
-        <p className="text-gray-400">Real-time detection and prevention of MEV attacks</p>
+        <p className="text-gray-400 text-xs sm:text-sm">Real-time detection and prevention of MEV attacks</p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-          <h3 className="text-gray-400 text-sm mb-2">Total Attacks</h3>
-          <p className="text-3xl font-bold text-white">{stats.total}</p>
-          <p className="text-gray-500 text-xs mt-1">Last 24 hours</p>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
+        <div className="bg-gray-800 rounded-xl p-3.5 sm:p-6 border border-gray-700">
+          <h3 className="text-gray-400 text-xs sm:text-sm mb-1 sm:mb-2">Total Attacks</h3>
+          <p className="text-xl sm:text-3xl font-bold text-white">{stats.total}</p>
+          <p className="text-gray-500 text-[10px] sm:text-xs mt-1">Last 24 hours</p>
         </div>
-        <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-          <h3 className="text-gray-400 text-sm mb-2">Prevented</h3>
-          <p className="text-3xl font-bold text-green-400">{stats.prevented}</p>
-          <p className="text-green-500 text-xs mt-1">{((stats.prevented / stats.total) * 100).toFixed(1)}% success rate</p>
+        <div className="bg-gray-800 rounded-xl p-3.5 sm:p-6 border border-gray-700">
+          <h3 className="text-gray-400 text-xs sm:text-sm mb-1 sm:mb-2">Prevented</h3>
+          <p className="text-xl sm:text-3xl font-bold text-green-400">{stats.prevented}</p>
+          <p className="text-green-500 text-[10px] sm:text-xs mt-1">{((stats.prevented / stats.total) * 100).toFixed(1)}% success</p>
         </div>
-        <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-          <h3 className="text-gray-400 text-sm mb-2">Detected</h3>
-          <p className="text-3xl font-bold text-yellow-400">{stats.detected}</p>
-          <p className="text-yellow-500 text-xs mt-1">Pending review</p>
+        <div className="bg-gray-800 rounded-xl p-3.5 sm:p-6 border border-gray-700">
+          <h3 className="text-gray-400 text-xs sm:text-sm mb-1 sm:mb-2">Detected</h3>
+          <p className="text-xl sm:text-3xl font-bold text-yellow-400">{stats.detected}</p>
+          <p className="text-yellow-500 text-[10px] sm:text-xs mt-1">Pending review</p>
         </div>
-        <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-          <h3 className="text-gray-400 text-sm mb-2">Analyzing</h3>
-          <p className="text-3xl font-bold text-blue-400">{stats.analyzing}</p>
-          <p className="text-blue-500 text-xs mt-1">In progress</p>
+        <div className="bg-gray-800 rounded-xl p-3.5 sm:p-6 border border-gray-700">
+          <h3 className="text-gray-400 text-xs sm:text-sm mb-1 sm:mb-2">Analyzing</h3>
+          <p className="text-xl sm:text-3xl font-bold text-blue-400">{stats.analyzing}</p>
+          <p className="text-blue-500 text-[10px] sm:text-xs mt-1">In progress</p>
         </div>
       </div>
 
       {/* Filters and Actions */}
-      <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 mb-6">
-        <div className="flex flex-wrap gap-4 items-center justify-between">
-          <div className="flex gap-4 items-center flex-1">
+      <div className="bg-gray-800 rounded-xl p-3.5 sm:p-6 border border-gray-700 mb-6">
+        <div className="flex flex-col md:flex-row gap-3 sm:gap-4 items-stretch md:items-center justify-between">
+          <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-4 items-stretch sm:items-center flex-1">
             {/* Search */}
-            <div className="relative flex-1 max-w-md">
-              <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <div className="relative flex-1">
+              <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search by ID or address..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                className="w-full pl-9 pr-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-xs sm:text-sm focus:outline-none focus:border-blue-500"
               />
             </div>
 
@@ -194,7 +194,7 @@ const AttackDetector: React.FC = () => {
             <select
               value={filterSeverity}
               onChange={(e) => setFilterSeverity(e.target.value)}
-              className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+              className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-xs sm:text-sm focus:outline-none focus:border-blue-500"
             >
               <option value="all">All Severities</option>
               <option value="critical">Critical</option>
@@ -207,7 +207,7 @@ const AttackDetector: React.FC = () => {
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
-              className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+              className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-xs sm:text-sm focus:outline-none focus:border-blue-500"
             >
               <option value="all">All Types</option>
               <option value="Sandwich">Sandwich</option>
@@ -218,12 +218,12 @@ const AttackDetector: React.FC = () => {
           </div>
 
           <div className="flex gap-2">
-            <button className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-white transition-all">
-              <RefreshCw size={16} />
+            <button className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-white text-xs sm:text-sm transition-all">
+              <RefreshCw size={14} />
               Refresh
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white transition-all">
-              <Download size={16} />
+            <button className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white text-xs sm:text-sm transition-all">
+              <Download size={14} />
               Export
             </button>
           </div>
