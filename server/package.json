@@ -5,9 +5,11 @@
   "main": "dist/server.js",
   "scripts": {
     "start": "node dist/server.js",
+    "start:prod": "npx prisma migrate deploy && node dist/server.js",
     "dev": "ts-node src/server.ts",
     "smoke": "node dist/scripts/smoke.js",
     "build": "tsc",
+    "postinstall": "npx prisma generate",
     "watch": "tsc --watch"
   },
   "dependencies": {

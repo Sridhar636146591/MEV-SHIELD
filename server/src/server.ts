@@ -25,7 +25,21 @@ const app: Express = express();
 const httpServer = createServer(app);
 
 // Middleware
-app.use(cors());
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
+  : ['http://localhost:3000', 'http://localhost:3001'];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, Render health checks)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.some(o => origin.startsWith(o)) || origin.includes('onrender.com') || origin.includes('vercel.app')) {
+      return callback(null, true);
+    }
+    return callback(null, true); // open CORS for now; tighten in production if needed
+  },
+  credentials: true,
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
